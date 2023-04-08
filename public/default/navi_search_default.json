@@ -1,0 +1,55 @@
+[
+  {
+    "title": "Google",
+    "url": "https://www.google.com/search?q=",
+    "iconUrl": "https://www.bing.com/th?id=OIP.1Nl9otEDi23qnVEQXPJuKQHaHa&w=179&h=175&c=8&rs=1&qlt=90&o=6&pid=3.1&rm=2"
+  },
+  {
+    "title": "Bing",
+    "url": "https://www.bing.com/search?q=",
+    "iconUrl": "https://www.bing.com/favicon.ico"
+  },
+  {
+    "title": "Baidu",
+    "url": "https://www.baidu.com/s?wd=",
+    "iconUrl": "https://www.baidu.com/favicon.ico"
+  },
+  {
+    "title": "v2ex",
+    "url": "https://www.google.com/search?q=",
+    "urlSuffix": "site:v2ex.com",
+    "iconUrl": "https://v2ex.com/favicon.ico"
+  },
+  {
+    "title": "CppReference",
+    "url": "https://www.bing.com/search?q=",
+    "urlSuffix": "site:en.cppreference.com",
+    "iconUrl": "https://en.cppreference.com/favicon.ico"
+  },
+  {
+    "title": "MoeGirl",
+    "url": "https://zh.moegirl.org.cn/index.php?search=",
+    "iconUrl": "https://zh.moegirl.org.cn/favicon.ico"
+  },
+  {
+    "title": "bilibili",
+    "url": "https://search.bilibili.com/all?keyword=",
+    "iconUrl": "https://www.bilibili.com/favicon.ico"
+  },
+  {
+    "title": "StackOverflow",
+    "url": "https://stackoverflow.com/search?q=",
+    "iconUrl": "https://stackoverflow.com/favicon.ico"
+  },
+  {
+    "title": "Zhihu",
+    "url": "https://www.zhihu.com/search?type=content&q=",
+    "iconUrl": "https://www.zhihu.com/favicon.ico"
+  },
+  {
+    "title": "Man7",
+    "url": "https://www.bing.com/search?q=",
+    "urlSuffix": "site:man7.org",
+    "iconUrl": "https://man7.org/koru-icon.png"
+  }
+]

@@ -1,0 +1,63 @@
+.navigator-container {
+  width: 100vw;
+  min-height: 100vh;
+  height: max-content;
+}
+
+::-webkit-scrollbar{
+  display: none;
+}
+
+.navigator-window-search {
+  padding: 0 10px 10px 10px;
+  margin: 20px;
+  border-radius: 25px;
+  float: left;
+  align-self: center;
+  text-align: left;
+  font-size: 20px;
+  font-family: Consolas, "Andale Mono", "Lucida Console", "Lucida Sans Typewriter", Monaco, "Courier New", "monospace";
+  width: 400px;
+  overflow: scroll;
+  max-height: 800px;
+}
+
+.navigator-window-search-text{
+  font-size: 20px;
+  width: 240px;
+}
+
+.navigator-window-search-tools{
+  float: right;
+}
+
+@media screen and (max-width: 430px){
+  .navigator-container{
+    display: flex;
+    flex-direction: column;
+  }
+  .navigator-window-search{
+    width: 80%;
+    max-height: 65vh;
+  }
+  .navigator-window-search-text{
+    font-size: small;
+    width: 120px;
+  }
+  .navi-window-search-avatars{
+    width: 30px;
+    height: 30px;
+    &-plugin{
+      width: 20px;
+      height: 20px;
+    }
+  }
+  .semi-modal{
+    max-width: 300px;
+  }
+  .semi-list-items{
+    >div>div>p{
+      font-size: small;
+    }
+  }
+}

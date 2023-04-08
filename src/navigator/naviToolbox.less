@@ -1,0 +1,140 @@
+@screen-limit: 420px;
+.navi-toolbox{
+  position: absolute;
+  right: 0;
+  top: 0;
+  // z-index: 15; // set in .tsx dynamically
+  display: flex;
+  width: fit-content;
+}
+.g-toolbox-icon{
+  color: #5f6368;
+  opacity: 0.87;
+  fill: currentColor;
+
+  width: 50px;
+  height: 50px;
+  margin: 25px;
+  background: white;
+  border-radius: 15px;
+
+  cursor: pointer;
+}
+.navi-toolbox-list-outer-box{
+  box-shadow: 2px 2px 2px 1px rgba(60 ,64, 67, 0.3);
+  color: rgba(0, 0, 0, 0.87);
+  background: #fff;
+  border: 1px solid rgba(0, 0, 0, .2);
+  border-radius: 8px;
+  overflow-x: hidden;
+  overflow-y: auto;
+  padding: 3px 6px 9px;
+  margin-top: 15px;
+  width: 300px;
+  height: 290px;
+  display: block;
+  visibility: hidden;
+}
+.navi-toolbox-list-inner-box{
+  list-style-type: none;
+  padding: 0 0 0 0;
+  box-sizing: content-box;
+}
+.navi-toolbox-item-list{
+  width: 80px;
+  height: 80px;
+  padding: 6px;
+  position: relative;
+  vertical-align: top;
+  border-radius: 8px;
+  // key to "list items" one by one in a box
+  display: inline-block;
+  align-items: center;
+  box-sizing: content-box;
+  transition: transform .2s cubic-bezier(.333,0,0,1);
+  >a, >div{
+     border-radius: 8px;
+     margin: 0;
+     outline: none;
+     text-align: center;
+     text-decoration: none;
+     cursor: pointer;
+     width: 80px;
+     position: absolute;
+     user-select: none;
+    >p{
+      color: #202124;
+      font-size: 13px;
+      font-family: "Microsoft YaHei", Consolas, sans-serif ;
+      letter-spacing: .09px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      margin: 5px 0 5px 0;
+    }
+    >span>img{
+      width: 48px;
+      height: 48px;
+    }
+  }
+}
+.toolbox-padding{
+  border-bottom: 5px solid transparent;
+  border-right: 5px solid #4273db;
+  border-top: 5px solid transparent;
+  visibility: hidden;
+  position: absolute;
+  &-left{
+    float: left;
+    left: 0;
+    top: 26px;
+  }
+  &-right{
+    float: right;
+    left: 79px;
+    top: 26px;
+  }
+  &-top{
+    left: 36px;
+    top: 57px;
+  }
+  &-bottom{
+    left: 36px;
+    top: 0;
+  }
+}
+@media screen and (min-width: @screen-limit){
+  .navi-toolbox-item-list:hover{
+    background: #E8F0FE;
+  }
+  .navi-toolbox-list-inner-box {
+    padding-inline-start: 7px;
+  }
+}
+@media screen and (max-width: @screen-limit){
+  .g-toolbox-icon{
+    width: 25px;
+    height: 25px;
+    margin: 10px;
+    border-radius: 8px;
+  }
+  .navi-toolbox-list-outer-box{
+    width: 240px;
+    height: 200px;
+  }
+  .navi-toolbox-item-list{
+    width: 60px;
+    height: 80px;
+    >a>p{
+      font-size: 13px;
+      font-family: "Microsoft YaHei", Consolas, Roboto, Helvetica, Arial, sans-serif;
+      letter-spacing: .09px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+  }
+  .navi-toolbox-list-inner-box {
+    padding-inline-start: 0;
+  }
+}
