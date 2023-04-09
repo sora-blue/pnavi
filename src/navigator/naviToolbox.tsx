@@ -7,7 +7,14 @@ import {
     LOCAL_STORAGE_TOOLKIT_LIST_ITEM,
     ToolkitItemProps
 } from "../constants";
-import {EditPluginItemProps, EditPluginsModal, EditPluginState, getExPluginsProps, getPluginsProps} from "./editPlugin";
+import {
+    EditPluginItemProps,
+    EditPluginsModal,
+    EditPluginState,
+    getBackgroundEditPlugin,
+    getExPluginsProps,
+    getPluginsProps
+} from "./editPlugin";
 import {cmpItemsLRU} from "../utils";
 
 /*
@@ -103,9 +110,11 @@ function WindowToolbox() {
     let [modalAddVisible, setModalAddVisible] = useState(false)
     let [modalDelVisible, setModalDelVisible] = useState(false)
     let [modalConfirmVisible, setModalConfirmVisible] = useState<ToolkitItemProps>() // also use to store title
+    let [modalBgEditVisible, setModalBgEditVisible] = useState(false)
     let addStat: EditPluginState = {status: modalAddVisible, setStatus: setModalAddVisible}
     let delStat: EditPluginState = {status: modalDelVisible, setStatus: setModalDelVisible}
     let confirmStat: EditPluginState = {status: modalConfirmVisible, setStatus: setModalConfirmVisible}
+    let bgEditStat: EditPluginState = {status: modalBgEditVisible, setStatus: setModalBgEditVisible}
     let editTemplate: ToolkitItemProps = {
         title: "标题",
         jumpUrl: "链接",
@@ -113,10 +122,12 @@ function WindowToolbox() {
     }
     const pluginProps = getPluginsProps(iconItems, wsReader, setWsReaderInitialized, [addStat, delStat, confirmStat], editTemplate)
     const extraPluginProps = getExPluginsProps(wsReader, setWsReaderInitialized, "toolbox")
+    const bgEditPluginProps = getBackgroundEditPlugin([bgEditStat])
     //
     return (
         <>
             {EditPluginsModal(pluginProps)}
+            {EditPluginsModal(bgEditPluginProps)}
             <span className={CLASSNAME_NAVI_TOOLBOX}>
             <span className={CLASSNAME_NAVI_TOOLBOX_OUTER_BOX} style={{
                 display: isToolboxVisible ? "inherit" : "none",
@@ -131,6 +142,7 @@ function WindowToolbox() {
                     <br></br>
                     {genPluginItem(extraPluginProps[0], "/img/notepad-5.png", "导出")}
                     {genPluginItem(extraPluginProps[1], "/img/outlook_express_tack-3.png", "导入")}
+                    {genPluginItem(bgEditPluginProps[0], "/img/kodak_imaging-0.png", "背景")}
                 </ul>
             </span>
             <svg className="g-toolbox-icon" focusable="false" viewBox="0 0 24 24"

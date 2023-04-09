@@ -1,5 +1,6 @@
 // Navi global constants
 export const DEFAULT_BACKGROUND = "url(\"https://s.cn.bing.net/th?id=OHR.LastDollarRoad_ZH-CN1462265798_1920x1080.jpg&rf=LaDigue_1920x1080.jpg\")"
+export const LOCAL_STORAGE_BACKGROUND_SRC = "BACKGROUND_SRC"
 
 // Navi Search Window localstorage
 export type SearchItemProps = {

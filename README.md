@@ -43,5 +43,5 @@ sudo npm config set registry https://registry.npm.taobao.org
 ```shell
 git clone https://github.com/sora-blue/pnavi
 cd pnavi
-npm i && npm run dev
+npm i && npm run devhost
 ```

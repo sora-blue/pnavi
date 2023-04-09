@@ -1,6 +1,7 @@
 import {ReactNode} from "react";
 import {Col, Modal, Row, Form, List, Button} from "@douyinfe/semi-ui";
 import {WindowSearchReader} from "./wsReader";
+import {DEFAULT_BACKGROUND, LOCAL_STORAGE_BACKGROUND_SRC} from "../constants";
 
 /*
 * 编辑插件，同时用于工具箱和搜索窗口
@@ -22,11 +23,11 @@ export type EditPluginState = {
 }
 
 // 根据父组件生成导入导出插件
-export function getExPluginsProps<ItemType extends {title: string, lruCount?: number | undefined}>(
+export function getExPluginsProps<ItemType extends { title: string, lruCount?: number | undefined }>(
     wsReader: WindowSearchReader<ItemType>,
     setWsReaderInitialized: (arg: boolean) => void,
     moduleName: string,
-){
+) {
     return [
         // 导出
         {
@@ -85,13 +86,13 @@ export function getExPluginsProps<ItemType extends {title: string, lruCount?: nu
 }
 
 // 根据父组件生成添加删除组件
-export function getPluginsProps<ItemType extends {title: string, lruCount?: number | undefined}>(
-                                items: ItemType[],
-                                wsReader: WindowSearchReader<ItemType>,
-                                setWsReaderInitialized: (arg: boolean) => void,
-                                states: EditPluginState[],
-                                editTemplate: ItemType){
-    if(states.length < 3) return []
+export function getPluginsProps<ItemType extends { title: string, lruCount?: number | undefined }>(
+    items: ItemType[],
+    wsReader: WindowSearchReader<ItemType>,
+    setWsReaderInitialized: (arg: boolean) => void,
+    states: EditPluginState[],
+    editTemplate: ItemType) {
+    if (states.length < 3) return []
     // --- add modal ---
     let templateAddSearchItem = Object.assign({}, editTemplate)
     let valuesAddSearchItem: ItemType | undefined = undefined
@@ -112,12 +113,12 @@ export function getPluginsProps<ItemType extends {title: string, lruCount?: numb
                     <Modal
                         key={"modal-add"}
                         onOk={() => {
-                            if(!!valuesAddSearchItem){
+                            if (!!valuesAddSearchItem) {
                                 let itemToAdd: ItemType = {...valuesAddSearchItem}
                                 // if already exists, update
-                                if(itemToAdd.title === (modalAddVisible as ItemType).title){
+                                if (itemToAdd.title === (modalAddVisible as ItemType).title) {
                                     wsReader.updateItem(itemToAdd)
-                                }else{
+                                } else {
                                     wsReader.removeItem(modalAddVisible as ItemType) // delete previous item
                                     wsReader.addItem(itemToAdd) // add new item
                                 }
@@ -140,7 +141,8 @@ export function getPluginsProps<ItemType extends {title: string, lruCount?: numb
                                             (name) => {
                                                 let label = Object.getOwnPropertyDescriptor(templateAddSearchItem, name)
                                                 return (
-                                                    <Form.Input field={name} label={label?.value || name} initValue={modalAddVisible instanceof Object ? modalAddVisible[name] : ""}></Form.Input>
+                                                    <Form.Input field={name} label={label?.value || name}
+                                                                initValue={modalAddVisible instanceof Object ? modalAddVisible[name] : ""}></Form.Input>
                                                 )
                                             }
                                         )
@@ -216,19 +218,19 @@ export function getPluginsProps<ItemType extends {title: string, lruCount?: numb
                             </List>
                             <Row type={"flex"} justify={"center"} gutter={16}
                                  key={"-modal-delete-all-row"}>
-                            <Button
-                                type={"danger"}
-                                onClick={() => {
-                                    // set confirm pop-up for each item
-                                    // there's no concurrency here so share the state
-                                    const result = window.confirm("DELETE ALL ITEMS?")
-                                    if(!result) return
-                                    for(let item of items){
-                                        wsReader.removeItem(item)
-                                    }
-                                    setWsReaderInitialized(false)
-                                }}
-                            >删除全部</Button>
+                                <Button
+                                    type={"danger"}
+                                    onClick={() => {
+                                        // set confirm pop-up for each item
+                                        // there's no concurrency here so share the state
+                                        const result = window.confirm("确认全部删除？")
+                                        if (!result) return
+                                        for (let item of items) {
+                                            wsReader.removeItem(item)
+                                        }
+                                        setWsReaderInitialized(false)
+                                    }}
+                                >删除全部</Button>
                             </Row>
                         </Modal>
                         <Modal
@@ -256,8 +258,76 @@ export function getPluginsProps<ItemType extends {title: string, lruCount?: numb
     return pluginProps
 }
 
+// 根据父组件生成修改背景组件
+export function getBackgroundEditPlugin(state: EditPluginState[]) {
+    if (state.length < 1) return []
+    let templateItem = {backgroundSrc: "背景src"}
+    let realItem = {backgroundSrc: localStorage.getItem(LOCAL_STORAGE_BACKGROUND_SRC) || DEFAULT_BACKGROUND}
+    let [modalBgEditVisible, setModalBgEditVisible] = [state[0].status, state[0].setStatus]
+    return [
+        {
+            title: "Q",
+            handler: () => {
+                setModalBgEditVisible(true)
+            },
+            componentGene: () => {
+                return (
+                    <>
+                        <Modal
+                            key={"modal-bgEdit"}
+                            onCancel={() => setModalBgEditVisible(false)}
+                            visible={modalBgEditVisible}
+                            onOk={() => {
+                                const beforeCleanup = () => {
+                                    // if empty
+                                    if(!realItem.backgroundSrc)
+                                        return
+                                    // add url wrap by default
+                                    let prefixes = ["http://", "https://", "/"]
+                                    for(let i = 0 ; i < prefixes.length ; i++){
+                                        if(realItem.backgroundSrc.startsWith(prefixes[i])){
+                                            realItem.backgroundSrc = "url(\"" + realItem.backgroundSrc + "\")"
+                                            break
+                                        }
+                                    }
+                                    // set
+                                    localStorage.setItem(LOCAL_STORAGE_BACKGROUND_SRC, realItem.backgroundSrc)
+                                }
+                                // cleanup
+                                beforeCleanup()
+                                setModalBgEditVisible(false)
+                                window.location.reload()
+                            }}
+                        >
+                            <Form layout={"vertical"} onValueChange={(value: typeof templateItem) => {
+                                realItem = value
+                            }}>
+                                {
+                                    () => (
+                                        <>{
+                                            Object.getOwnPropertyNames(templateItem).map(
+                                                (name) => {
+                                                    let label = Object.getOwnPropertyDescriptor(templateItem, name)
+                                                    return (
+                                                        <Form.Input field={name} label={label?.value || name}
+                                                                    initValue={(realItem as any)[name]}></Form.Input>
+                                                    )
+                                                }
+                                            )
+                                        }</>
+                                    )
+                                }
+                            </Form>
+                        </Modal>
+                    </>
+                )
+            }
+        }
+    ]
+}
+
 // 根据属性生成弹窗插入到父组件
-export function EditPluginsModal(pluginProps: EditPluginItemProps[]){
+export function EditPluginsModal(pluginProps: EditPluginItemProps[]) {
     return (
         <>
             {

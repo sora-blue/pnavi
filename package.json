@@ -22,7 +22,8 @@
     "web-vitals": "^2.1.4"
   },
   "scripts": {
-    "dev": "vite --host",
+    "dev": "vite",
+    "devhost": "vite --host",
     "build": "tsc -noEmit && vite build",
     "preview": "vite preview"
   },
