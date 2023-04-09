@@ -10,7 +10,8 @@ import WindowToolbox from "./naviToolbox";
 function Navigator() {
     return (
         <div style={{
-            background: DEFAULT_BACKGROUND
+            background: DEFAULT_BACKGROUND,
+            backgroundSize: "cover",
         }}>
             <div className={"navigator-container"}>
                 <WindowSearch/>
