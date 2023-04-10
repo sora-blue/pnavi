@@ -1,7 +1,8 @@
 import {ReactNode} from "react";
 import {Col, Modal, Row, Form, List, Button} from "@douyinfe/semi-ui";
 import {WindowSearchReader} from "./wsReader";
-import {DEFAULT_BACKGROUND, LOCAL_STORAGE_BACKGROUND_SRC} from "../constants";
+import {LOCAL_STORAGE_BACKGROUND_SRC} from "../constants";
+import {switchBgByMonth} from "../utils";
 
 /*
 * 编辑插件，同时用于工具箱和搜索窗口
@@ -262,7 +263,7 @@ export function getPluginsProps<ItemType extends { title: string, lruCount?: num
 export function getBackgroundEditPlugin(state: EditPluginState[]) {
     if (state.length < 1) return []
     let templateItem = {backgroundSrc: "背景src"}
-    let realItem = {backgroundSrc: localStorage.getItem(LOCAL_STORAGE_BACKGROUND_SRC) || DEFAULT_BACKGROUND}
+    let realItem = {backgroundSrc: localStorage.getItem(LOCAL_STORAGE_BACKGROUND_SRC) || switchBgByMonth()}
     let [modalBgEditVisible, setModalBgEditVisible] = [state[0].status, state[0].setStatus]
     return [
         {
@@ -280,8 +281,10 @@ export function getBackgroundEditPlugin(state: EditPluginState[]) {
                             onOk={() => {
                                 const beforeCleanup = () => {
                                     // if empty
-                                    if(!realItem.backgroundSrc)
+                                    if(!realItem.backgroundSrc){
+                                        localStorage.removeItem(LOCAL_STORAGE_BACKGROUND_SRC)
                                         return
+                                    }
                                     // add url wrap by default
                                     let prefixes = ["http://", "https://", "/"]
                                     for(let i = 0 ; i < prefixes.length ; i++){
