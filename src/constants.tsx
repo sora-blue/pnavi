@@ -1,8 +1,8 @@
 // Navi global constants
-export const DEFAULT_BACKGROUND_SPRING = "url(\"/img/bg/spring_@usalica.jpg\")"
+export const DEFAULT_BACKGROUND_SPRING = "url(\"/img/bg/spring_@usalica.jpg\") center/80%"
 export const DEFAULT_BACKGROUND_SUMMER = "url(\"/img/bg/summer_@usalica.jpg\")"
 export const DEFAULT_BACKGROUND_AUTUMN = "url(\"/img/bg/autumn_@usalica.jpg\")"
-export const DEFAULT_BACKGROUND_WINTER = "url(\"/img/bg/winter_@usalica.jpg\")"
+export const DEFAULT_BACKGROUND_WINTER = "url(\"/img/bg/winter_@usalica.jpg\") center/80%"
 export const LOCAL_STORAGE_BACKGROUND_SRC = "BACKGROUND_SRC"
 
 // Navi Search Window localstorage

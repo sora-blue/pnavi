@@ -15,7 +15,7 @@ import {
     getExPluginsProps,
     getPluginsProps
 } from "./editPlugin";
-import {cmpItemsLRU} from "../utils";
+import {cmpItemsLRU, isSrcLink} from "../utils";
 
 /*
 * 工具箱组件
@@ -71,6 +71,9 @@ function WindowToolbox() {
     )
     // generate list item
     const genListItem = (item: ToolkitItemProps) => {
+        if(isSrcLink(item.iconPath)){
+            item.iconPath = `url("${item.iconPath}") no-repeat center/80%`
+        }
         return (
             <li className={CLASSNAME_NAVI_TOOLBOX_BOX_ITEM_LIST}>
                 <a href={item.jumpUrl} onClick={(() => {
@@ -80,9 +83,12 @@ function WindowToolbox() {
                     wsReader.updateItem(prop)
                 })}>
                     {genPaddings()}
-                    <span>
-                        <img src={item.iconPath} alt={item.title}></img>
-                    </span>
+                    <div style={{
+                        width: "78px",
+                        height: "64px",
+                        background: item.iconPath
+                    }}>
+                    </div>
                     <p>{item.title}</p>
                 </a>
             </li>

@@ -30,3 +30,13 @@ export function switchBgByMonth(){
         return DEFAULT_BACKGROUND_AUTUMN
     return DEFAULT_BACKGROUND_WINTER
 }
+
+export function isSrcLink(src: string){
+    const prefixes = ["http://", "https://", "/"]
+    for(let i = 0 ; i < prefixes.length ; i++) {
+        if (src.startsWith(prefixes[i])) {
+            return true
+        }
+    }
+    return false
+}

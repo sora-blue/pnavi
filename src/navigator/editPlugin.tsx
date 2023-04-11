@@ -2,7 +2,7 @@ import {ReactNode} from "react";
 import {Col, Modal, Row, Form, List, Button} from "@douyinfe/semi-ui";
 import {WindowSearchReader} from "./wsReader";
 import {LOCAL_STORAGE_BACKGROUND_SRC} from "../constants";
-import {switchBgByMonth} from "../utils";
+import {isSrcLink, switchBgByMonth} from "../utils";
 
 /*
 * 编辑插件，同时用于工具箱和搜索窗口
@@ -286,12 +286,8 @@ export function getBackgroundEditPlugin(state: EditPluginState[]) {
                                         return
                                     }
                                     // add url wrap by default
-                                    let prefixes = ["http://", "https://", "/"]
-                                    for(let i = 0 ; i < prefixes.length ; i++){
-                                        if(realItem.backgroundSrc.startsWith(prefixes[i])){
-                                            realItem.backgroundSrc = "url(\"" + realItem.backgroundSrc + "\")"
-                                            break
-                                        }
+                                    if(isSrcLink(realItem.backgroundSrc)){
+                                        realItem.backgroundSrc = "url(\"" + realItem.backgroundSrc + "\")"
                                     }
                                     // set
                                     localStorage.setItem(LOCAL_STORAGE_BACKGROUND_SRC, realItem.backgroundSrc)
