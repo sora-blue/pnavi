@@ -1,8 +1,16 @@
 import {ReactNode} from "react";
-import {Col, Modal, Row, Form, List, Button} from "@douyinfe/semi-ui";
+import {Col, Modal, Row, Form, List, Button, Input, Switch} from "@douyinfe/semi-ui";
 import {WindowSearchReader} from "./wsReader";
-import {LOCAL_STORAGE_BACKGROUND_SRC} from "../constants";
-import {isSrcLink, switchBgByMonth} from "../utils";
+import {
+    LOCAL_STORAGE_BACKGROUND_SRC,
+    LOCAL_STORAGE_SEARCH_WINDOWS_OPACITY,
+    LOCAL_STORAGE_TOOLBOX_DEFAULT_SHOW,
+    ID_SEARCH_WINDOW_ADD_BUTTON_OK,
+    SEARCH_WINDOW_DEFAULT_OPACITY,
+    ID_TOOLBOX_SETTINGS_BUTTON_OK
+} from "../constants";
+import {clickConfirmModal, isSrcLink, switchBgByMonth, url2iconUrl, wrapUrl} from "../utils";
+import Label from "@douyinfe/semi-ui/lib/es/form/label";
 
 /*
 * 编辑插件，同时用于工具箱和搜索窗口
@@ -23,8 +31,14 @@ export type EditPluginState = {
     setStatus: (arg: any) => void
 }
 
+export type BaseItemType = {
+    title: string,
+    lruCount?: number | undefined,
+    iconUrl?: string,
+}
+
 // 根据父组件生成导入导出插件
-export function getExPluginsProps<ItemType extends { title: string, lruCount?: number | undefined }>(
+export function getExPluginsProps<ItemType extends BaseItemType>(
     wsReader: WindowSearchReader<ItemType>,
     setWsReaderInitialized: (arg: boolean) => void,
     moduleName: string,
@@ -87,7 +101,7 @@ export function getExPluginsProps<ItemType extends { title: string, lruCount?: n
 }
 
 // 根据父组件生成添加删除组件
-export function getPluginsProps<ItemType extends { title: string, lruCount?: number | undefined }>(
+export function getPluginsProps<ItemType extends BaseItemType>(
     items: ItemType[],
     wsReader: WindowSearchReader<ItemType>,
     setWsReaderInitialized: (arg: boolean) => void,
@@ -110,9 +124,11 @@ export function getPluginsProps<ItemType extends { title: string, lruCount?: num
                 setModalAddVisible(true)
             },
             componentGene: () => {
+                const confirmModal = () => {clickConfirmModal(ID_SEARCH_WINDOW_ADD_BUTTON_OK)}
                 return (
                     <Modal
                         key={"modal-add"}
+                        okButtonProps={{id: ID_SEARCH_WINDOW_ADD_BUTTON_OK}}
                         onOk={() => {
                             if (!!valuesAddSearchItem) {
                                 let itemToAdd: ItemType = {...valuesAddSearchItem}
@@ -143,6 +159,7 @@ export function getPluginsProps<ItemType extends { title: string, lruCount?: num
                                                 let label = Object.getOwnPropertyDescriptor(templateAddSearchItem, name)
                                                 return (
                                                     <Form.Input field={name} label={label?.value || name}
+                                                                onEnterPress={confirmModal}
                                                                 initValue={modalAddVisible instanceof Object ? modalAddVisible[name] : ""}></Form.Input>
                                                 )
                                             }
@@ -260,25 +277,36 @@ export function getPluginsProps<ItemType extends { title: string, lruCount?: num
 }
 
 // 根据父组件生成修改背景组件
-export function getBackgroundEditPlugin(state: EditPluginState[]) {
+export function getSettingsEditPluginProps(state: EditPluginState[]) {
     if (state.length < 1) return []
-    let templateItem = {backgroundSrc: "背景src"}
-    let realItem = {backgroundSrc: localStorage.getItem(LOCAL_STORAGE_BACKGROUND_SRC) || switchBgByMonth()}
-    let [modalBgEditVisible, setModalBgEditVisible] = [state[0].status, state[0].setStatus]
+    // 标签
+    let templateItem = {backgroundSrc: "背景src", toolboxDefaultShow: "工具箱默认显示", searchWindowOpacity: "搜索窗口不透明度"}
+    let realItem = {
+        backgroundSrc: localStorage.getItem(LOCAL_STORAGE_BACKGROUND_SRC) || switchBgByMonth(),
+        toolboxDefaultShow: !!localStorage.getItem(LOCAL_STORAGE_TOOLBOX_DEFAULT_SHOW),
+        searchWindowOpacity: localStorage.getItem(LOCAL_STORAGE_SEARCH_WINDOWS_OPACITY) || SEARCH_WINDOW_DEFAULT_OPACITY,
+    }
+    let [modalSettingsEditVisible, setModalSettingsEditVisible] = [state[0].status, state[0].setStatus]
+    const CLASSNAME_SUB = "modal-settings-edit-sub"
     return [
         {
             title: "Q",
             handler: () => {
-                setModalBgEditVisible(true)
+                setModalSettingsEditVisible(true)
             },
             componentGene: () => {
+                const confirmModal = () => {
+                    clickConfirmModal(ID_TOOLBOX_SETTINGS_BUTTON_OK)
+                }
                 return (
                     <>
                         <Modal
-                            key={"modal-bgEdit"}
-                            onCancel={() => setModalBgEditVisible(false)}
-                            visible={modalBgEditVisible}
+                            key={"modal-settings-edit"}
+                            onCancel={() => setModalSettingsEditVisible(false)}
+                            visible={modalSettingsEditVisible}
+                            okButtonProps={{id: ID_TOOLBOX_SETTINGS_BUTTON_OK}}
                             onOk={() => {
+                                // 1. set bg
                                 const beforeCleanup = () => {
                                     // if empty
                                     if(!realItem.backgroundSrc){
@@ -294,29 +322,44 @@ export function getBackgroundEditPlugin(state: EditPluginState[]) {
                                 }
                                 // cleanup
                                 beforeCleanup()
-                                setModalBgEditVisible(false)
+                                // 2. set toolbox visible
+                                if(realItem.toolboxDefaultShow){
+                                    localStorage.setItem(LOCAL_STORAGE_TOOLBOX_DEFAULT_SHOW, "1")
+                                }else{
+                                    localStorage.removeItem(LOCAL_STORAGE_TOOLBOX_DEFAULT_SHOW)
+                                }
+                                // 3. set search window opacity
+                                let sw_opacity = realItem.searchWindowOpacity
+                                if(sw_opacity){
+                                    let sw_num_opacity = Number(sw_opacity)
+                                    if(sw_num_opacity >= 0 && sw_num_opacity <= 100){
+                                        localStorage.setItem(LOCAL_STORAGE_SEARCH_WINDOWS_OPACITY, `${sw_num_opacity}`)
+                                    }
+                                }else{
+                                    localStorage.removeItem(LOCAL_STORAGE_SEARCH_WINDOWS_OPACITY)
+                                }
+                                // end
+                                setModalSettingsEditVisible(false)
                                 window.location.reload()
                             }}
                         >
-                            <Form layout={"vertical"} onValueChange={(value: typeof templateItem) => {
-                                realItem = value
-                            }}>
-                                {
-                                    () => (
-                                        <>{
-                                            Object.getOwnPropertyNames(templateItem).map(
-                                                (name) => {
-                                                    let label = Object.getOwnPropertyDescriptor(templateItem, name)
-                                                    return (
-                                                        <Form.Input field={name} label={label?.value || name}
-                                                                    initValue={(realItem as any)[name]}></Form.Input>
-                                                    )
-                                                }
-                                            )
-                                        }</>
-                                    )
-                                }
-                            </Form>
+                            <Label className={CLASSNAME_SUB}>{templateItem.backgroundSrc}</Label>
+                            <br></br>
+                            <Input onChange={(value) => {
+                                realItem.backgroundSrc = value
+                            }} defaultValue={realItem.backgroundSrc} onEnterPress={confirmModal}></Input>
+                            <br></br>
+                            <Label className={CLASSNAME_SUB}>{templateItem.toolboxDefaultShow}</Label>
+                            <br></br>
+                            <Switch onChange={(value) => {
+                                realItem.toolboxDefaultShow = value
+                            }} defaultChecked={realItem.toolboxDefaultShow}></Switch>
+                            <br></br>
+                            <Label className={CLASSNAME_SUB}>{templateItem.searchWindowOpacity}</Label>
+                            <Input onChange={(value: string) => {
+                                realItem.searchWindowOpacity = value
+                            }} type={"number"} addonAfter={"%"} defaultValue={realItem.searchWindowOpacity} onEnterPress={confirmModal}></Input>
+                            <br></br>
                         </Modal>
                     </>
                 )
@@ -341,3 +384,15 @@ export function EditPluginsModal(pluginProps: EditPluginItemProps[]) {
     )
 }
 
+export async function fetchDefaultIcon<ItemType extends BaseItemType>(item: ItemType, wsReader: WindowSearchReader<ItemType>, realUrl: string, wrapped=true){
+    return new Promise<void>((resolve) => {
+        realUrl = url2iconUrl(realUrl)
+        if(wrapped){
+            item.iconUrl = wrapUrl(realUrl as string)
+        }else{
+            item.iconUrl = realUrl as string
+        }
+        wsReader.updateItem(item)
+        resolve()
+    })
+}

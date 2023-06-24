@@ -10,16 +10,16 @@
 
 .navigator-window-search {
   padding: 0 10px 10px 10px;
-  margin: 20px;
+  margin: 5% 20px 0 20%;
   border-radius: 25px;
   float: left;
   align-self: center;
   text-align: left;
   font-size: 20px;
   font-family: Consolas, "Andale Mono", "Lucida Console", "Lucida Sans Typewriter", Monaco, "Courier New", "monospace";
-  width: 400px;
+  width: 60%;
   overflow: scroll;
-  max-height: 800px;
+  max-height: 80vh;
 }
 
 .navigator-window-search-text{
@@ -31,12 +31,17 @@
   float: right;
 }
 
+.modal-settings-edit-sub{
+  padding: 10px 0 10px 0;
+}
+
 @media screen and (max-width: 430px){
   .navigator-container{
     display: flex;
     flex-direction: column;
   }
   .navigator-window-search{
+    margin: 20px;
     width: 80%;
     max-height: 65vh;
   }

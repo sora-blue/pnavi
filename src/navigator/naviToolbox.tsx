@@ -2,6 +2,7 @@ import "./naviToolbox.less"
 import {useState} from "react";
 import {WindowSearchReader} from "./wsReader";
 import {
+    LOCAL_STORAGE_TOOLBOX_DEFAULT_SHOW,
     LOCAL_STORAGE_TOOLKIT_DEFAULT_PROPS_LOCATION,
     LOCAL_STORAGE_TOOLKIT_LIST,
     LOCAL_STORAGE_TOOLKIT_LIST_ITEM,
@@ -11,11 +12,12 @@ import {
     EditPluginItemProps,
     EditPluginsModal,
     EditPluginState,
-    getBackgroundEditPlugin,
+    getSettingsEditPluginProps,
     getExPluginsProps,
-    getPluginsProps
+    getPluginsProps,
+    fetchDefaultIcon,
 } from "./editPlugin";
-import {cmpItemsLRU, isSrcLink} from "../utils";
+import {cmpItemsLRU, isSrcLink, url2iconUrl} from "../utils";
 
 /*
 * 工具箱组件
@@ -34,7 +36,7 @@ const CLASSNAME_NAVI_TOOLBOX_ICON = "g-toolbox-icon"
 
 function WindowToolbox() {
     // set visible
-    const [isToolboxVisible, setToolboxVisible] = useState(false)
+    const [isToolboxVisible, setToolboxVisible] = useState(!!localStorage.getItem(LOCAL_STORAGE_TOOLBOX_DEFAULT_SHOW))
     // close toolbox window when blank areas are clicked
     window.onclick = (evt) => {
         const eleList = document.querySelector(`.${CLASSNAME_NAVI_TOOLBOX_OUTER_BOX}`)
@@ -43,6 +45,7 @@ function WindowToolbox() {
         // @ts-ignore
         if (eleList.contains(evt.target) || eleIcon.contains(evt.target)) return
         setToolboxVisible(false)
+        resetToolboxScroll()
     }
     // read config from localstorage
     let [wsReader] = useState<WindowSearchReader<ToolkitItemProps>>(
@@ -71,8 +74,19 @@ function WindowToolbox() {
     )
     // generate list item
     const genListItem = (item: ToolkitItemProps) => {
-        if(isSrcLink(item.iconPath)){
-            item.iconPath = `url("${item.iconPath}") no-repeat center/80%`
+        // adjust
+        if(item.iconUrl){
+            if(isSrcLink(item.iconUrl))
+            item.iconUrl = `url("${item.iconUrl}") no-repeat center/80%`
+        }else if(item.jumpUrl && isSrcLink(item.jumpUrl)){
+            fetchDefaultIcon(item, wsReader, item.jumpUrl, true).then(() => {
+                setWsReaderInitialized(false)
+            }, () => {
+                // use default favicon.ico
+                item.iconUrl = url2iconUrl(item.jumpUrl)
+                wsReader.updateItem(item)
+                setWsReaderInitialized(false)
+            })
         }
         return (
             <li className={CLASSNAME_NAVI_TOOLBOX_BOX_ITEM_LIST}>
@@ -86,7 +100,7 @@ function WindowToolbox() {
                     <div style={{
                         width: "78px",
                         height: "64px",
-                        background: item.iconPath
+                        background: item.iconUrl
                     }}>
                     </div>
                     <p>{item.title}</p>
@@ -101,6 +115,7 @@ function WindowToolbox() {
                 <div onClick={() => {
                     if (item.handler === undefined) return
                     setToolboxVisible(false)
+                    resetToolboxScroll()
                     item.handler()
                 }}>
                     {genPaddings()}
@@ -124,16 +139,16 @@ function WindowToolbox() {
     let editTemplate: ToolkitItemProps = {
         title: "标题",
         jumpUrl: "链接",
-        iconPath: "图标链接",
+        iconUrl: "图标链接（可选）",
     }
     const pluginProps = getPluginsProps(iconItems, wsReader, setWsReaderInitialized, [addStat, delStat, confirmStat], editTemplate)
     const extraPluginProps = getExPluginsProps(wsReader, setWsReaderInitialized, "toolbox")
-    const bgEditPluginProps = getBackgroundEditPlugin([bgEditStat])
+    const settingsEditPluginProps = getSettingsEditPluginProps([bgEditStat])
     //
     return (
         <>
             {EditPluginsModal(pluginProps)}
-            {EditPluginsModal(bgEditPluginProps)}
+            {EditPluginsModal(settingsEditPluginProps)}
             <span className={CLASSNAME_NAVI_TOOLBOX}>
             <span className={CLASSNAME_NAVI_TOOLBOX_OUTER_BOX} style={{
                 display: isToolboxVisible ? "inherit" : "none",
@@ -142,13 +157,13 @@ function WindowToolbox() {
             }}>
                 <ul className={CLASSNAME_NAVI_TOOLBOX_INNER_BOX}>
                     {iconItems.map(genListItem)}
-                    <br></br>
+                    <hr style={{opacity: "60%", position: "relative", margin: "10%"}}></hr>
                     {genPluginItem(pluginProps[0], "/img/trust0-0.png", "添加")}
                     {genPluginItem(pluginProps[1], "/img/restrict-1.png", "删除")}
                     <br></br>
                     {genPluginItem(extraPluginProps[0], "/img/notepad-5.png", "导出")}
                     {genPluginItem(extraPluginProps[1], "/img/outlook_express_tack-3.png", "导入")}
-                    {genPluginItem(bgEditPluginProps[0], "/img/kodak_imaging-0.png", "背景")}
+                    {genPluginItem(settingsEditPluginProps[0], "/img/kodak_imaging-0.png", "设置")}
                 </ul>
             </span>
             <svg className="g-toolbox-icon" focusable="false" viewBox="0 0 24 24"
@@ -159,6 +174,12 @@ function WindowToolbox() {
         </span>
         </>
     )
+}
+
+function resetToolboxScroll(){
+    const eleList = document.querySelector(`.${CLASSNAME_NAVI_TOOLBOX_OUTER_BOX}`)
+    if(eleList)
+        eleList.scrollTop = 0
 }
 
 export default WindowToolbox;

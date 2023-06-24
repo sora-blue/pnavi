@@ -40,3 +40,26 @@ export function isSrcLink(src: string){
     }
     return false
 }
+
+export function clickConfirmModal(idName: string){
+    const butOK = document.querySelector(`#${idName}`) as HTMLButtonElement
+    if(!butOK) return
+    butOK.click()
+}
+
+export function url2iconUrl(url: string){
+    url = url.trim()
+    if(url.startsWith('/'))
+        return '/favicon.ico'
+    let arr = url.split('/')
+    let iconUrl = ""
+    for(let i = 0 ; i < 3 && i < arr.length ; i++){
+        iconUrl += arr[i] + '/';
+    }
+    iconUrl += "favicon.ico"
+    return iconUrl
+}
+
+export function wrapUrl(url: string) {
+    return `url("${url}") no-repeat center/80%`
+}

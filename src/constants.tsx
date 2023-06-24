@@ -23,10 +23,16 @@ export const LOCAL_STORAGE_WINDOW_SEARCH_DEFAULT_PROPS_LOCATION = "/default/navi
 export type ToolkitItemProps = {
     title: string,
     jumpUrl: string,
-    iconPath: string,
+    iconUrl: string,
     lruCount?: number,
 }
 
 export const LOCAL_STORAGE_TOOLKIT_LIST = "TOOLKIT_LIST"
 export const LOCAL_STORAGE_TOOLKIT_LIST_ITEM = "TOOLKIT_LIST_ITEM_"
-export const LOCAL_STORAGE_TOOLKIT_DEFAULT_PROPS_LOCATION = "/default/navi_toolkit_default.json"
+export const LOCAL_STORAGE_TOOLKIT_DEFAULT_PROPS_LOCATION = "/toolkit_default.json"
+export const LOCAL_STORAGE_TOOLBOX_DEFAULT_SHOW = "TOOLBOX_DEFAULT_SHOW"
+export const LOCAL_STORAGE_SEARCH_WINDOWS_OPACITY = "SEARCH_WINDOW_OPACITY"
+
+export const SEARCH_WINDOW_DEFAULT_OPACITY = "80"
+export const ID_TOOLBOX_SETTINGS_BUTTON_OK = "toolbox-settings-button-ok"
+export const ID_SEARCH_WINDOW_ADD_BUTTON_OK = "search-windows-add-button-ok"

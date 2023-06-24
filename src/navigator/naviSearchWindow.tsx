@@ -7,15 +7,24 @@ import {
     SearchItemProps,
     LOCAL_STORAGE_WINDOW_SEARCH_LIST,
     LOCAL_STORAGE_WINDOW_SEARCH_LIST_ITEM,
-    LOCAL_STORAGE_WINDOW_SEARCH_DEFAULT_PROPS_LOCATION
+    LOCAL_STORAGE_WINDOW_SEARCH_DEFAULT_PROPS_LOCATION,
+    LOCAL_STORAGE_SEARCH_WINDOWS_OPACITY,
+    SEARCH_WINDOW_DEFAULT_OPACITY,
 } from "../constants";
-import {EditPluginState, getPluginsProps, EditPluginsModal, EditPluginItemProps, getExPluginsProps} from "./editPlugin";
-import {cmpItemsLRU} from "../utils";
+import {
+    EditPluginState,
+    getPluginsProps,
+    EditPluginsModal,
+    EditPluginItemProps,
+    getExPluginsProps,
+    fetchDefaultIcon,
+} from "./editPlugin";
+import {cmpItemsLRU, isSrcLink, url2iconUrl} from "../utils";
 
 /*
 * 搜索窗口组件
 * */
-
+const ID_SEARCH_WINDOW = "window-search"
 export function WindowSearch() {
     // --- read search items ---
     let [wsReader] = useState<WindowSearchReader<SearchItemProps>>(
@@ -47,10 +56,21 @@ export function WindowSearch() {
     }
     const pluginProps = getPluginsProps(items, wsReader, setWsReaderInitialized, [addStat, delStat, confirmStat], editTemplate)
     const extraProps = getExPluginsProps(wsReader, setWsReaderInitialized, "search_window")
+    // transition time
+    const waitSeconds = 1
+    const opacity = `${localStorage.getItem(LOCAL_STORAGE_SEARCH_WINDOWS_OPACITY) || SEARCH_WINDOW_DEFAULT_OPACITY}%`
+    setTimeout(() => {
+        const ele = document.querySelector(`#${ID_SEARCH_WINDOW}`)
+        if(!ele) return
+        ele.setAttribute("style", `transition: opacity ${waitSeconds}s; opacity: ${opacity};`)
+    }, 300)
     return (
         <>
             {EditPluginsModal(pluginProps)}
-            <div key={"window-search"}>
+            <div key={"window-search"} id={ID_SEARCH_WINDOW} style={{
+                transition: "opacity 3s",
+                opacity: "0%",
+            }}>
                 <Card
                     className={"navigator-window-search"}
                     title={"快速搜索"}
@@ -64,15 +84,15 @@ export function WindowSearch() {
                     }}
                 >
                     {WindowSearchPluginsButtons(pluginProps.concat(extraProps))}
-                    {WindowSearchCard(items, wsReader)}
+                    {WindowSearchCard(items, wsReader, setWsReaderInitialized)}
                 </Card>
             </div>
         </>
-    )
+    );
 }
 
 // LRU排序的搜索源
-function WindowSearchCard(items: SearchItemProps[], wsReader: WindowSearchReader<SearchItemProps>) {
+function WindowSearchCard(items: SearchItemProps[], wsReader: WindowSearchReader<SearchItemProps>, setWsReaderInitialized: any) {
     return (
         <div>
             {
@@ -104,11 +124,23 @@ function WindowSearchCard(items: SearchItemProps[], wsReader: WindowSearchReader
                         <Avatar color={selectedColor} shape={'square'} size={"medium"}
                                 className={avatarClassName}>{iconText}</Avatar>
                     )
-                    if (prop.iconUrl) {
+                    if(prop.iconUrl === "default"){
+                        // do nothing
+                    }
+                    else if (prop.iconUrl) {
                         avatarComponent = (
                             <Avatar src={prop.iconUrl} shape={'square'} size={"medium"}
                                     className={avatarClassName}></Avatar>
                         )
+                    }else if(prop.url && isSrcLink(prop.url)){
+                        fetchDefaultIcon(prop, wsReader, prop.url, false).then(() => {
+                            setWsReaderInitialized(false)
+                        }, () => {
+                            // use default favicon.ico
+                            prop.iconUrl = url2iconUrl(prop.url);
+                            wsReader.updateItem(prop)
+                            setWsReaderInitialized(false)
+                        })
                     }
                     //
                     return (
