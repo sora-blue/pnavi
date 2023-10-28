@@ -39,7 +39,12 @@ export class WindowSearchReader<ItemType extends {title: string, lruCount?: numb
                     window.localStorage.setItem(this.nameList, JSON.stringify([...this.propsMap.keys()]))
                     return [...this.propsMap.values()]
                 }
-            )
+            ).then((result: any) => {
+                console.log("wsReader: fetch default config success")
+            }, (reason: any) => {
+                console.log(`wsReader: fail fetching default config`)
+                console.log(reason)
+            })
         }
         if(!tmpList){
             return [...this.propsMap.values()]
