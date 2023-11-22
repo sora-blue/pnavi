@@ -1,0 +1,73 @@
+on:
+  push:
+    branches:
+      - main
+      - master
+# https://juejin.cn/post/7113562222852309023
+jobs:
+  build:
+    name: build & deploy
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Pull repo
+        uses: actions/checkout@v2
+      - name: Install node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: "16.x"
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 7.9.0
+      # 添加缓存，逻辑和CI Workflow里的一样
+      - name: Cache
+        id: cache-dependencies
+        uses: actions/cache@v3
+        with:
+          path: |
+            **/node_modules
+          key: ${{runner.OS}}-${{hashFiles('**/pnpm-lock.yaml')}}
+      # 安装依赖。命中缓存则跳过此步
+      - name: Installing dependencies
+        if: steps.cache-dependencies.outputs.cache-hit != 'true'
+        run: |
+          pnpm install
+          npm install vite
+      # 从package.json里获取version属性的值
+      # 在CD Workflow中会给每个生成的制品打上标签，而标签取值于version值
+      - name: Read version
+        # 读取出来的值会放在steps.[id].outputs.value供其他步骤step读取
+        id: version
+        uses: ashley-taylor/read-json-property-action@v1.0
+        with:
+          path: ./package.json
+          property: version
+      - name: Build
+        run: |
+          pnpm run build
+      # https://docs.github.com/en/rest/overview/permissions-required-for-fine-grained-personal-access-tokens?apiVersion=2022-11-28#repository-permissions-for-contents
+      - name: Pull github.io repo
+        uses: actions/checkout@v3
+        with:
+          repository: 'sora-blue/sora-blue.github.io'
+          token: ${{ secrets.IO_TOKEN }}
+          path: 'website'
+      - name: Push to github.io
+        env:
+          COMMIT_MSG: ${{ github.event.head_commit.message }}
+        run: |
+          pwd
+          ls -l 
+          ls -l website
+          rm website/index.html
+          rm -rf website/assets
+          cp -r dist/index.html website
+          cp -r dist/assets website/assets
+          cd website
+          COMMIT_MSG=$(echo -e $COMMIT_MSG | head -n 1)
+          git config user.name sora-blue
+          git config user.email 56759083+sora-blue@users.noreply.github.com
+          git add .
+          git commit -m "$COMMIT_MSG"
+          git push origin
+          cd ..

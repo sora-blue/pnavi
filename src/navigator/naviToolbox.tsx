@@ -2,6 +2,7 @@ import "./naviToolbox.less"
 import {useState} from "react";
 import {WindowSearchReader} from "./wsReader";
 import {
+    EDIT_TEMPLATE_TOOLKIT_ITEM,
     LOCAL_STORAGE_TOOLBOX_DEFAULT_SHOW,
     LOCAL_STORAGE_TOOLKIT_DEFAULT_PROPS_LOCATION,
     LOCAL_STORAGE_TOOLKIT_LIST,
@@ -12,12 +13,12 @@ import {
     EditPluginItemProps,
     EditPluginsModal,
     EditPluginState,
-    getSettingsEditPluginProps,
+    fetchDefaultIcon,
     getExPluginsProps,
     getPluginsProps,
-    fetchDefaultIcon,
+    getSettingsEditPluginProps,
 } from "./editPlugin";
-import {cmpItemsLRU, isSrcLink, url2iconUrl} from "../utils";
+import {cmpItemsLRUWithTop, isSrcLink, url2iconUrl} from "../utils";
 
 /*
 * 工具箱组件
@@ -59,7 +60,7 @@ function WindowToolbox() {
     if (!wsReaderInitialized) {
         wsReader.read().then((result) => {
             setWsReaderInitialized(true)
-            result.sort(cmpItemsLRU)
+            result.sort(cmpItemsLRUWithTop)
             setIconItems(result)
         })
     }
@@ -136,12 +137,7 @@ function WindowToolbox() {
     let delStat: EditPluginState = {status: modalDelVisible, setStatus: setModalDelVisible}
     let confirmStat: EditPluginState = {status: modalConfirmVisible, setStatus: setModalConfirmVisible}
     let bgEditStat: EditPluginState = {status: modalBgEditVisible, setStatus: setModalBgEditVisible}
-    let editTemplate: ToolkitItemProps = {
-        title: "标题",
-        jumpUrl: "链接",
-        iconUrl: "图标链接（可选）",
-    }
-    const pluginProps = getPluginsProps(iconItems, wsReader, setWsReaderInitialized, [addStat, delStat, confirmStat], editTemplate)
+    const pluginProps = getPluginsProps(iconItems, wsReader, setWsReaderInitialized, [addStat, delStat, confirmStat], EDIT_TEMPLATE_TOOLKIT_ITEM)
     const extraPluginProps = getExPluginsProps(wsReader, setWsReaderInitialized, "toolbox")
     const settingsEditPluginProps = getSettingsEditPluginProps([bgEditStat])
     //

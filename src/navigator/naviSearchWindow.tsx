@@ -1,30 +1,35 @@
 import {useState} from "react";
 import {WindowSearchReader} from "./wsReader";
-import {Avatar, Card, Col, Input, Row, Space} from "@douyinfe/semi-ui";
+import {Avatar, Card, Col, Input, Row, Space, TextArea} from "@douyinfe/semi-ui";
 import {AvatarColor} from "@douyinfe/semi-ui/lib/es/avatar";
 import {IconSearch} from "@douyinfe/semi-icons";
 import {
-    SearchItemProps,
+    LOCAL_STORAGE_SEARCH_WINDOWS_OPACITY,
+    LOCAL_STORAGE_WINDOW_SEARCH_DEFAULT_PROPS_LOCATION,
     LOCAL_STORAGE_WINDOW_SEARCH_LIST,
     LOCAL_STORAGE_WINDOW_SEARCH_LIST_ITEM,
-    LOCAL_STORAGE_WINDOW_SEARCH_DEFAULT_PROPS_LOCATION,
-    LOCAL_STORAGE_SEARCH_WINDOWS_OPACITY,
     SEARCH_WINDOW_DEFAULT_OPACITY,
+    EDIT_TEMPLATE_SEARCH_ITEM,
+    SearchItemProps,
+    NAVi_SEARCH_WINDOW_TRANSITION_TIMEOUT,
+    NAVi_SEARCH_WINDOW_TRANSITION_DURATION,
+    NAVi_SEARCH_WINDOW_LONG_TEXT_LIMIT, BaseTemplateType,
 } from "../constants";
 import {
-    EditPluginState,
-    getPluginsProps,
-    EditPluginsModal,
     EditPluginItemProps,
-    getExPluginsProps,
+    EditPluginsModal,
+    EditPluginState,
     fetchDefaultIcon,
+    getExPluginsProps,
+    getPluginsProps,
 } from "./editPlugin";
-import {cmpItemsLRU, isSrcLink, url2iconUrl} from "../utils";
+import {cmpItemsLRUWithTop, isSrcLink, url2iconUrl} from "../utils";
 
 /*
 * 搜索窗口组件
 * */
 const ID_SEARCH_WINDOW = "window-search"
+
 export function WindowSearch() {
     // --- read search items ---
     let [wsReader] = useState<WindowSearchReader<SearchItemProps>>(
@@ -38,7 +43,7 @@ export function WindowSearch() {
         // sort by LRU
         wsReader.read().then((result) => {
             setWsReaderInitialized(true)
-            result.sort(cmpItemsLRU)
+            result.sort(cmpItemsLRUWithTop)
             setItems(result)
         })
     }
@@ -48,22 +53,17 @@ export function WindowSearch() {
     let addStat: EditPluginState = {status: modalAddVisible, setStatus: setModalAddVisible}
     let delStat: EditPluginState = {status: modalDelVisible, setStatus: setModalDelVisible}
     let confirmStat: EditPluginState = {status: modalConfirmVisible, setStatus: setModalConfirmVisible}
-    let editTemplate: SearchItemProps = {
-        title: "标题",
-        url: "链接前缀",
-        urlSuffix: "链接后缀（可选）",
-        iconUrl: "图标链接（可选）",
-    }
+    let editTemplate: BaseTemplateType<SearchItemProps> = Object.assign({}, EDIT_TEMPLATE_SEARCH_ITEM)
     const pluginProps = getPluginsProps(items, wsReader, setWsReaderInitialized, [addStat, delStat, confirmStat], editTemplate)
     const extraProps = getExPluginsProps(wsReader, setWsReaderInitialized, "search_window")
     // transition time
-    const waitSeconds = 1
+    const waitSeconds = NAVi_SEARCH_WINDOW_TRANSITION_DURATION
     const opacity = `${localStorage.getItem(LOCAL_STORAGE_SEARCH_WINDOWS_OPACITY) || SEARCH_WINDOW_DEFAULT_OPACITY}%`
     setTimeout(() => {
         const ele = document.querySelector(`#${ID_SEARCH_WINDOW}`)
-        if(!ele) return
+        if (!ele) return
         ele.setAttribute("style", `transition: opacity ${waitSeconds}s; opacity: ${opacity};`)
-    }, 300)
+    }, NAVi_SEARCH_WINDOW_TRANSITION_TIMEOUT)
     return (
         <>
             {EditPluginsModal(pluginProps)}
@@ -124,15 +124,14 @@ function WindowSearchCard(items: SearchItemProps[], wsReader: WindowSearchReader
                         <Avatar color={selectedColor} shape={'square'} size={"medium"}
                                 className={avatarClassName}>{iconText}</Avatar>
                     )
-                    if(prop.iconUrl === "default"){
+                    if (prop.iconUrl === "default") {
                         // do nothing
-                    }
-                    else if (prop.iconUrl) {
+                    } else if (prop.iconUrl) {
                         avatarComponent = (
                             <Avatar src={prop.iconUrl} shape={'square'} size={"medium"}
                                     className={avatarClassName}></Avatar>
                         )
-                    }else if(prop.url && isSrcLink(prop.url)){
+                    } else if (prop.url && isSrcLink(prop.url)) {
                         fetchDefaultIcon(prop, wsReader, prop.url, false).then(() => {
                             setWsReaderInitialized(false)
                         }, () => {
@@ -154,25 +153,44 @@ function WindowSearchCard(items: SearchItemProps[], wsReader: WindowSearchReader
                                     </Col>
                                     <Col span={16}
                                          key={"window-search" + prop.title + "-show-col-1"}>
-                                        <p className={"navigator-window-search-text"}>{searchTitle}</p>
+                                        <p className={prop?.isOnTop ? "navigator-window-search-text-top" : "navigator-window-search-text"}>{searchTitle}</p>
                                     </Col>
                                 </Space>
                             </Row>
                             <Row justify={"start"} gutter={[16, 16]} key={"window-search" + prop.title + "-input"}>
                                 <Col offset={1} span={20}
                                      key={"window-search" + prop.title + "-input-col-0"}>
-                                    <Input
-                                        size={"large"}
-                                        style={{font: "Consolas"}}
-                                        prefix={<IconSearch/>}
-                                        showClear={true}
-                                        onChange={(value) => {
-                                            inputValue = value
-                                        }}
-                                        onEnterPress={() => {
-                                            return inputOnKeyPress(inputValue, prop)
-                                        }}
-                                        className={"navigator-window-search-input"}></Input>
+                                    {
+                                        function(){
+                                            // 如果设置长文本，使用TextArea组件
+                                            if (prop.isLongText) {
+                                                return (<TextArea
+                                                    autosize
+                                                    maxCount={NAVi_SEARCH_WINDOW_LONG_TEXT_LIMIT}
+                                                    onChange={(value) => {
+                                                        inputValue = value
+                                                    }}
+                                                    onEnterPress={() => {
+                                                        return inputOnKeyPress(inputValue, prop)
+                                                    }}
+                                                />)
+                                            }
+                                            return (
+                                                <Input
+                                                    size={"large"}
+                                                    style={{font: "Consolas"}}
+                                                    prefix={<IconSearch/>}
+                                                    showClear={true}
+                                                    onChange={(value) => {
+                                                        inputValue = value
+                                                    }}
+                                                    onEnterPress={() => {
+                                                        return inputOnKeyPress(inputValue, prop)
+                                                    }}
+                                                    className={"navigator-window-search-input"}/>
+                                            )
+                                        }()
+                                    }
                                 </Col>
                             </Row>
                         </div>

@@ -1,4 +1,5 @@
 import {
+    BaseItemType,
     DEFAULT_BACKGROUND_AUTUMN,
     DEFAULT_BACKGROUND_SPRING,
     DEFAULT_BACKGROUND_SUMMER,
@@ -9,7 +10,7 @@ export function hashCode(s: string){
     return s.split("").reduce(function(a,b){a=((a<<5)-a)+b.charCodeAt(0);return a&a},0);
 }
 
-export function cmpItemsLRU(a: any, b: any){
+export function cmpItemsLRU<ItemType extends BaseItemType>(a: ItemType, b: ItemType){
     if (!a.lruCount) {
         a.lruCount = 0;
     }
@@ -17,6 +18,23 @@ export function cmpItemsLRU(a: any, b: any){
         b.lruCount = 0;
     }
     return (a.lruCount > b.lruCount) ? -1 : 1;
+}
+
+
+export function cmpItemsLRUWithTop<ItemType extends BaseItemType>(a: ItemType, b: ItemType){
+    // 都不存在这个属性 (这种写法一看就是写js的)
+    if(!a.isOnTop && !b.isOnTop){
+        return cmpItemsLRU(a, b);
+    }
+    // 这个属性都为真
+    if(a.isOnTop && b.isOnTop){
+        return cmpItemsLRU(a, b);
+    }
+
+    if(a.isOnTop){
+        return -1;
+    }
+    return 1;
 }
 
 export function switchBgByMonth(){

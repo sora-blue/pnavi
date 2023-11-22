@@ -7,7 +7,9 @@ import {
     LOCAL_STORAGE_TOOLBOX_DEFAULT_SHOW,
     ID_SEARCH_WINDOW_ADD_BUTTON_OK,
     SEARCH_WINDOW_DEFAULT_OPACITY,
-    ID_TOOLBOX_SETTINGS_BUTTON_OK
+    ID_TOOLBOX_SETTINGS_BUTTON_OK,
+    BaseItemType,
+    BaseTemplateType,
 } from "../constants";
 import {clickConfirmModal, isSrcLink, switchBgByMonth, url2iconUrl, wrapUrl} from "../utils";
 import Label from "@douyinfe/semi-ui/lib/es/form/label";
@@ -31,11 +33,6 @@ export type EditPluginState = {
     setStatus: (arg: any) => void
 }
 
-export type BaseItemType = {
-    title: string,
-    lruCount?: number | undefined,
-    iconUrl?: string,
-}
 
 // 根据父组件生成导入导出插件
 export function getExPluginsProps<ItemType extends BaseItemType>(
@@ -106,10 +103,10 @@ export function getPluginsProps<ItemType extends BaseItemType>(
     wsReader: WindowSearchReader<ItemType>,
     setWsReaderInitialized: (arg: boolean) => void,
     states: EditPluginState[],
-    editTemplate: ItemType) {
+    editTemplate: BaseTemplateType<ItemType>) {
     if (states.length < 3) return []
     // --- add modal ---
-    let templateAddSearchItem = Object.assign({}, editTemplate)
+    let templateAddSearchItem: BaseTemplateType<ItemType> = Object.assign({}, editTemplate)
     let valuesAddSearchItem: ItemType | undefined = undefined
     let [modalAddVisible, setModalAddVisible] = [states[0].status, states[0].setStatus]
     // --- delete modal ---
@@ -155,10 +152,20 @@ export function getPluginsProps<ItemType extends BaseItemType>(
                                 () => (
                                     <>{
                                         Object.getOwnPropertyNames(templateAddSearchItem).map(
-                                            (name) => {
-                                                let label = Object.getOwnPropertyDescriptor(templateAddSearchItem, name)
+                                            (name: string) => {
+                                                // 想不到办法取到entry?.value对应的模板参数，所以拿不到整个Entry对象，暂时先这样实现功能了
+                                                let entry = Object.getOwnPropertyDescriptor(templateAddSearchItem, name) // extends BaseTemplateEntryType<T>
+                                                if(typeof entry?.value?.defaultValue === "boolean"){
+                                                    return (
+                                                        <Form.Switch
+                                                            field={name}
+                                                            label={entry?.value?.label || name}
+                                                            initValue={modalAddVisible instanceof Object ? modalAddVisible[name] : !!entry?.value?.defaultValue}
+                                                        />
+                                                    )
+                                                }
                                                 return (
-                                                    <Form.Input field={name} label={label?.value || name}
+                                                    <Form.Input field={name} label={entry?.value?.label || name}
                                                                 onEnterPress={confirmModal}
                                                                 initValue={modalAddVisible instanceof Object ? modalAddVisible[name] : ""}></Form.Input>
                                                 )
