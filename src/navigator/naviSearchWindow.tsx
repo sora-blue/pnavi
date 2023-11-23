@@ -24,7 +24,7 @@ import {
     getPluginsProps,
 } from "./editPlugin";
 import {cmpItemsLRUWithTop, isSrcLink, url2iconUrl} from "../utils";
-import {ButTextArea} from "../components/ButTextArea";
+import {ButTextArea} from "../components/ButTextArea/ButTextArea";
 
 /*
 * 搜索窗口组件
