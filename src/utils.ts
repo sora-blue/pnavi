@@ -20,6 +20,44 @@ export function cmpItemsLRU<ItemType extends BaseItemType>(a: ItemType, b: ItemT
     return (a.lruCount > b.lruCount) ? -1 : 1;
 }
 
+export type FetchSuggestedResp = {
+    prepend: string,
+    append: string
+}
+export async function fetchSuggestedAppend(text: string) {
+    return new Promise((resolve) => {
+        fetch(`https://www.bingapis.com/api/v7/suggestions?appid=B1513F135D0D1D1FC36E8C31C30A31BB25E804D0&setmkt=en-US&q=${text}`).then(
+            (response: Response,) => {
+                response.json().then(
+                    (value: {suggestionGroups: Array<{searchSuggestions: Array<{ghostText: string}>}>}) => {
+                        let resp : FetchSuggestedResp = {prepend: text, append: ""}
+                        if(value.suggestionGroups.length === 0){
+                            resolve(resp);
+                            return;
+                        }
+
+                        const suggestions = value.suggestionGroups[0].searchSuggestions
+                        if(suggestions.length === 0){
+                            resolve(resp);
+                            return;
+                        }
+
+                        const suggestedText = suggestions[0].ghostText
+                        if(!suggestedText){
+                            return
+                        }
+
+                        resp.append = suggestedText.slice(text.length)
+                        resolve(resp)
+                    })
+            },
+            () => {
+                resolve({prepend: text, append: ""});
+            }
+        )
+    })
+
+}
 
 export function cmpItemsLRUWithTop<ItemType extends BaseItemType>(a: ItemType, b: ItemType){
     // 都不存在这个属性 (这种写法一看就是写js的)

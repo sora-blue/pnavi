@@ -53,18 +53,21 @@ jobs:
           token: ${{ secrets.IO_TOKEN }}
           path: 'website'
       - name: Push to github.io
-        env:
-          COMMIT_MSG: ${{ github.event.head_commit.message }}
         run: |
           pwd
           ls -l 
           ls -l website
           rm website/index.html
           rm -rf website/assets
+          rm -rf website/default
           cp -r dist/index.html website
           cp -r dist/assets website/assets
+          cp -r dist/default website/default
           cd website
-          COMMIT_MSG=$(echo -e $COMMIT_MSG | head -n 1)
+          cat > commit_msg <<'EOL'
+          ${{ github.event.head_commit.message }}
+          EOL
+          COMMIT_MSG=$(cat commit_msg | head -n 1)
           git config user.name sora-blue
           git config user.email 56759083+sora-blue@users.noreply.github.com
           git add .

@@ -4,6 +4,7 @@ export const DEFAULT_BACKGROUND_SUMMER = "url(\"/img/bg/summer_@usalica.jpg\")"
 export const DEFAULT_BACKGROUND_AUTUMN = "url(\"/img/bg/autumn_@usalica.jpg\")"
 export const DEFAULT_BACKGROUND_WINTER = "url(\"/img/bg/winter_@usalica.jpg\") center/80%"
 export const LOCAL_STORAGE_BACKGROUND_SRC = "BACKGROUND_SRC"
+export const NAVi_SEARCH_WINDOW_AUTOFILL_TIMEOUT = 1000 // ms
 export const NAVi_SEARCH_WINDOW_TRANSITION_TIMEOUT = 300 // ms
 export const NAVi_SEARCH_WINDOW_TRANSITION_DURATION = 1 // s
 export const NAVi_SEARCH_WINDOW_LONG_TEXT_LIMIT = 2000 // chars

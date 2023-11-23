@@ -1,13 +1,16 @@
 [
   {
+    "title": "BingAI",
+    "url": "https://www.bing.com/search?q=",
+    "urlSuffix": "&showconv=1&sendquery=1&cc=au",
+    "iconUrl": "https://www.bing.com/favicon.ico",
+    "isOnTop": true,
+    "isLongText": true
+  },
+  {
     "title": "Google",
     "url": "https://www.google.com/search?q=",
     "iconUrl": "https://www.bing.com/th?id=OIP.1Nl9otEDi23qnVEQXPJuKQHaHa&w=179&h=175&c=8&rs=1&qlt=90&o=6&pid=3.1&rm=2"
-  },
-  {
-    "title": "Bing",
-    "url": "https://www.bing.com/search?q=",
-    "iconUrl": "https://www.bing.com/favicon.ico"
   },
   {
     "title": "Baidu",

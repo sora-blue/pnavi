@@ -1,6 +1,6 @@
 import {useState} from "react";
 import {WindowSearchReader} from "./wsReader";
-import {Avatar, Card, Col, Input, Row, Space, TextArea} from "@douyinfe/semi-ui";
+import {Avatar, Card, Col, Input, Row, Space} from "@douyinfe/semi-ui";
 import {AvatarColor} from "@douyinfe/semi-ui/lib/es/avatar";
 import {IconSearch} from "@douyinfe/semi-icons";
 import {
@@ -24,6 +24,7 @@ import {
     getPluginsProps,
 } from "./editPlugin";
 import {cmpItemsLRUWithTop, isSrcLink, url2iconUrl} from "../utils";
+import {ButTextArea} from "../components/ButTextArea";
 
 /*
 * 搜索窗口组件
@@ -164,16 +165,16 @@ function WindowSearchCard(items: SearchItemProps[], wsReader: WindowSearchReader
                                         function(){
                                             // 如果设置长文本，使用TextArea组件
                                             if (prop.isLongText) {
-                                                return (<TextArea
-                                                    autosize
-                                                    maxCount={NAVi_SEARCH_WINDOW_LONG_TEXT_LIMIT}
-                                                    onChange={(value) => {
-                                                        inputValue = value
-                                                    }}
-                                                    onEnterPress={() => {
-                                                        return inputOnKeyPress(inputValue, prop)
-                                                    }}
-                                                />)
+                                                return (
+                                                    <>
+                                                        <ButTextArea
+                                                            maxCount={NAVi_SEARCH_WINDOW_LONG_TEXT_LIMIT}
+                                                            enableAutofill={true}
+                                                            onCtrlEnter={(val) => {
+                                                                return inputOnKeyPress(val, prop)
+                                                            }}
+                                                        />
+                                                    </>)
                                             }
                                             return (
                                                 <Input
