@@ -9,7 +9,7 @@ import {
     SEARCH_WINDOW_DEFAULT_OPACITY,
     ID_TOOLBOX_SETTINGS_BUTTON_OK,
     BaseItemType,
-    BaseTemplateType,
+    BaseTemplateType, CACHE_NAME,
 } from "../constants";
 import {clickConfirmModal, isSrcLink, switchBgByMonth, url2iconUrl, wrapUrl} from "../utils";
 import Label from "@douyinfe/semi-ui/lib/es/form/label";
@@ -286,10 +286,22 @@ export function getPluginsProps<ItemType extends BaseItemType>(
 // 根据父组件生成修改背景组件
 export function getSettingsEditPluginProps(state: EditPluginState[]) {
     if (state.length < 1) return []
+    //
+    const stored_bg_src = localStorage.getItem(LOCAL_STORAGE_BACKGROUND_SRC)
+    if(stored_bg_src && stored_bg_src.startsWith("url")){
+        caches.open(CACHE_NAME).then((result: Cache) => {
+            if (!result) {
+                return
+            }
+            const url = stored_bg_src.split('"')[1]
+            console.log(`caching ${url}`)
+            result.add(url)
+        })
+    }
     // 标签
     let templateItem = {backgroundSrc: "背景src", toolboxDefaultShow: "工具箱默认显示", searchWindowOpacity: "搜索窗口不透明度"}
     let realItem = {
-        backgroundSrc: localStorage.getItem(LOCAL_STORAGE_BACKGROUND_SRC) || switchBgByMonth(),
+        backgroundSrc: stored_bg_src || switchBgByMonth(),
         toolboxDefaultShow: !!localStorage.getItem(LOCAL_STORAGE_TOOLBOX_DEFAULT_SHOW),
         searchWindowOpacity: localStorage.getItem(LOCAL_STORAGE_SEARCH_WINDOWS_OPACITY) || SEARCH_WINDOW_DEFAULT_OPACITY,
     }

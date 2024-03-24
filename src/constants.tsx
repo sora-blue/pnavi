@@ -9,6 +9,8 @@ export const NAVi_SEARCH_WINDOW_TRANSITION_TIMEOUT = 300 // ms
 export const NAVi_SEARCH_WINDOW_TRANSITION_DURATION = 1 // s
 export const NAVi_SEARCH_WINDOW_LONG_TEXT_LIMIT = 2000 // chars
 
+export const CACHE_NAME = "cache-v2"
+
 // https://www.typescriptlang.org/docs/handbook/2/indexed-access-types.html
 // 新增BaseTemplateType类型：取ItemType里所有的键，类型为BaseTemplateEntryType，作为配置项
 export type BaseItemType = {
